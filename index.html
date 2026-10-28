@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kitchen Cards</title>
+<meta name="theme-color" content="#d9b98c">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/index-192.png">
+<link rel="apple-touch-icon" href="icons/index-180.png">
+<link rel="manifest" href="index.webmanifest">
+<style>
+  :root { --bg:#faf6f1; --card:#fff; --ink:#2b1d14; --muted:#7a6a5d; --accent:#8a4b22; --line:#e8ddd1; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#1c1511; --card:#2a2019; --ink:#f3e9df; --muted:#b5a496; --accent:#e0a068; --line:#3f3128; }
+  }
+  * { box-sizing:border-box; }
+  body { margin:0; padding:16px; background:var(--bg); color:var(--ink);
+         font:17px/1.45 -apple-system, system-ui, "Segoe UI", sans-serif; max-width:560px; margin-inline:auto; }
+  h1 { font-size:1.6rem; margin:4px 0 2px; }
+  .sub { color:var(--muted); margin:0 0 16px; font-size:.95rem; }
+  a.card { display:flex; align-items:center; gap:14px; background:var(--card); border:1px solid var(--line);
+           border-radius:14px; padding:12px; margin-bottom:12px; color:inherit; text-decoration:none; }
+  a.card img { width:56px; height:56px; border-radius:12px; flex:none; }
+  .name { font-size:1.1rem; font-weight:700; color:var(--accent); }
+  .desc { color:var(--muted); font-size:.88rem; }
+</style>
+</head>
+<body>
+
+<h1>Kitchen Cards</h1>
+<p class="sub">Quick reference cookbooks</p>
+
+<a class="card" href="pour-over-coffee.html">
+  <img src="icons/pour-over-coffee-192.png" alt="">
+  <div><div class="name">Pour Over Coffee</div><div class="desc">Coffee and water for 1, 2 or 4 cups, grind size and bean types</div></div>
+</a>
+
+<a class="card" href="espresso-shots.html">
+  <img src="icons/espresso-shots-192.png" alt="">
+  <div><div class="name">Espresso Shots</div><div class="desc">Dose, water and yield for 1, 2 or 4 shots, plus ristretto and lungo</div></div>
+</a>
+
+<a class="card" href="rice-cooking.html">
+  <img src="icons/rice-cooking-192.png" alt="">
+  <div><div class="name">Cooking Rice</div><div class="desc">Water ratios and stovetop times for 14 types of rice, with search</div></div>
+</a>
+
+</body>
+</html>
