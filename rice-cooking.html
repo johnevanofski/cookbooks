@@ -33,8 +33,14 @@
   .grid div { background:var(--tint); border-radius:10px; padding:8px 4px; }
   .grid b { display:block; font-size:1.2rem; color:var(--accent); line-height:1.2; }
   .grid span { font-size:.72rem; text-transform:uppercase; letter-spacing:.04em; color:var(--muted); }
-  .water { margin-top:8px; }
-  .water b { font-size:1.05rem; }
+  .seg { display:flex; align-items:center; gap:6px; margin-top:8px; }
+  .seg .lbl { font-size:.85rem; color:var(--muted); margin-right:2px; white-space:nowrap; }
+  .seg button { flex:1; padding:9px 0; border:1px solid var(--line); border-radius:10px; background:var(--card);
+                color:var(--ink); font:inherit; font-weight:600; }
+  .seg button.on { background:var(--accent); color:#fff; border-color:var(--accent); }
+  .water { margin-top:10px; text-align:center; background:var(--tint); border-radius:10px; padding:8px 4px; }
+  .water span { display:block; font-size:.72rem; text-transform:uppercase; letter-spacing:.04em; color:var(--muted); }
+  .water b { font-size:1.25rem; color:var(--accent); }
   .tip { color:var(--muted); font-size:.85rem; margin:8px 0 0; }
   .empty { text-align:center; color:var(--muted); padding:20px 0; display:none; }
   ol { margin:0; padding-left:1.2em; }
@@ -45,10 +51,14 @@
 <body>
 
 <h1>🍚 Cooking Rice</h1>
-<p class="sub">Stovetop, covered pot. Rice in cups, water in milliliters (1 cup = 240 mL).</p>
+<p class="sub">Stovetop, covered pot. Rice and water in cups, with milliliters in parentheses (1 cup = 240 mL).</p>
 
 <div class="search">
   <input id="q" type="search" placeholder="Search rice (basmati, sushi, brown, sticky…)" autocomplete="off">
+  <div class="seg" id="amt">
+    <span class="lbl">Cups of rice</span>
+    <button data-c="1" class="on">1</button><button data-c="2">2</button><button data-c="3">3</button><button data-c="4">4</button>
+  </div>
 </div>
 
 <div class="card">
@@ -105,9 +115,17 @@
   const empty = document.getElementById('empty');
   const round5 = n => Math.round(n / 5) * 5;
   const fmt = n => (Math.round(n * 100) / 100).toString();
+  // cups rounded to the nearest 1/8 (2 tbsp), shown as a mixed fraction
+  const FR = ['', '⅛', '¼', '⅜', '½', '⅝', '¾', '⅞'];
+  function cups(n) {
+    const e = Math.round(n * 8), whole = Math.floor(e / 8), f = FR[e % 8];
+    return (whole || !f ? whole : '') + f + (e === 8 ? ' cup' : ' cups');
+  }
+
+  let amount = 1;
 
   function card(x) {
-    const w = c => round5(x.r * 240 * c);
+    const w = round5(x.r * 240 * amount);
     return `<div class="card${x.pop ? ' pop' : ''}" data-s="${(x.n + ' ' + x.a).toLowerCase()}">
       <div class="head"><span class="name">${x.n}</span>${x.pop ? '<span class="tag">Popular</span>' : ''}</div>
       <div class="desc">${x.d}</div>
@@ -116,18 +134,16 @@
         <div><b>${x.cook}</b><span>Simmer</span></div>
         <div><b>${x.rest}</b><span>Rest</span></div>
       </div>
-      <div class="water"><span class="note">Water for</span>
-        <b>1 cup</b> rice = <b>${w(1)} mL</b> &nbsp;·&nbsp;
-        <b>2</b> = <b>${w(2)} mL</b> &nbsp;·&nbsp;
-        <b>4</b> = <b>${w(4)} mL</b></div>
+      <div class="water"><span>Water for ${amount} ${amount === 1 ? 'cup' : 'cups'} of rice</span>
+        <b>${cups(x.r * amount)}</b> (${w} mL)</div>
       <p class="tip">${x.tip}</p>
     </div>`;
   }
 
-  list.innerHTML = RICE.map(card).join('');
+  const q = document.getElementById('q');
 
-  document.getElementById('q').addEventListener('input', e => {
-    const terms = e.target.value.toLowerCase().split(/\s+/).filter(Boolean);
+  function applyFilter() {
+    const terms = q.value.toLowerCase().split(/\s+/).filter(Boolean);
     let shown = 0;
     list.querySelectorAll('.card').forEach(c => {
       const ok = terms.every(t => c.dataset.s.includes(t));
@@ -135,7 +151,22 @@
       if (ok) shown++;
     });
     empty.style.display = shown ? 'none' : 'block';
+  }
+
+  function render() {
+    list.innerHTML = RICE.map(card).join('');
+    applyFilter();
+  }
+
+  q.addEventListener('input', applyFilter);
+  document.querySelectorAll('#amt button').forEach(b => b.onclick = () => {
+    document.querySelectorAll('#amt button').forEach(x => x.classList.remove('on'));
+    b.classList.add('on');
+    amount = +b.dataset.c;
+    render();
   });
+
+  render();
 </script>
 </body>
 </html>

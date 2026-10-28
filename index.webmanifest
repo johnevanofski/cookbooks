@@ -1,6 +1,6 @@
 {
-  "name": "Kitchen Cards",
-  "short_name": "Kitchen",
+  "name": "Cookbooks",
+  "short_name": "Cookbooks",
   "start_url": "index.html",
   "display": "standalone",
   "background_color": "#faf6f1",
