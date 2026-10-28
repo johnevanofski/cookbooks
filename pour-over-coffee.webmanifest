@@ -1,0 +1,12 @@
+{
+  "name": "Pour Over Coffee",
+  "short_name": "Pour Over",
+  "start_url": "pour-over-coffee.html",
+  "display": "standalone",
+  "background_color": "#faf6f1",
+  "theme_color": "#f1e4d3",
+  "icons": [
+    { "src": "icons/pour-over-coffee-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "icons/pour-over-coffee-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}

@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cooking Rice</title>
+<meta name="theme-color" content="#8fb39a">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/rice-cooking-192.png">
+<link rel="apple-touch-icon" href="icons/rice-cooking-180.png">
+<link rel="manifest" href="rice-cooking.webmanifest">
+<style>
+  :root { --bg:#faf6f1; --card:#fff; --ink:#2b1d14; --muted:#7a6a5d; --accent:#8a4b22; --line:#e8ddd1; --tint:#f5ebe0; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#1c1511; --card:#2a2019; --ink:#f3e9df; --muted:#b5a496; --accent:#e0a068; --line:#3f3128; --tint:#352a21; }
+  }
+  * { box-sizing:border-box; }
+  body { margin:0; padding:16px; background:var(--bg); color:var(--ink);
+         font:17px/1.45 -apple-system, system-ui, "Segoe UI", sans-serif; max-width:560px; margin-inline:auto; }
+  h1 { font-size:1.6rem; margin:4px 0 2px; }
+  h2 { font-size:1.1rem; margin:0 0 10px; color:var(--accent); }
+  .sub { color:var(--muted); margin:0 0 12px; font-size:.95rem; }
+  .search { position:sticky; top:0; z-index:5; background:var(--bg); padding:8px 0 10px; }
+  .search input { width:100%; padding:12px 14px; font:inherit; border:1px solid var(--line); border-radius:12px;
+                  background:var(--card); color:var(--ink); }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:14px; padding:14px; margin-bottom:12px; }
+  .card.pop { border-color:var(--accent); border-width:2px; }
+  .head { display:flex; justify-content:space-between; align-items:baseline; gap:8px; }
+  .name { font-size:1.15rem; font-weight:700; }
+  .tag { font-size:.7rem; text-transform:uppercase; letter-spacing:.05em; background:var(--accent); color:#fff;
+         padding:2px 8px; border-radius:99px; white-space:nowrap; }
+  .desc { color:var(--muted); font-size:.88rem; margin:2px 0 10px; }
+  .grid { display:grid; grid-template-columns:repeat(3,1fr); gap:6px; text-align:center; }
+  .grid div { background:var(--tint); border-radius:10px; padding:8px 4px; }
+  .grid b { display:block; font-size:1.2rem; color:var(--accent); line-height:1.2; }
+  .grid span { font-size:.72rem; text-transform:uppercase; letter-spacing:.04em; color:var(--muted); }
+  .water { margin-top:8px; }
+  .water b { font-size:1.05rem; }
+  .tip { color:var(--muted); font-size:.85rem; margin:8px 0 0; }
+  .empty { text-align:center; color:var(--muted); padding:20px 0; display:none; }
+  ol { margin:0; padding-left:1.2em; }
+  li { margin-bottom:6px; }
+  .note { color:var(--muted); font-size:.85rem; }
+</style>
+</head>
+<body>
+
+<h1>🍚 Cooking Rice</h1>
+<p class="sub">Stovetop, covered pot. Rice in cups, water in milliliters (1 cup = 240 mL).</p>
+
+<div class="search">
+  <input id="q" type="search" placeholder="Search rice (basmati, sushi, brown, sticky…)" autocomplete="off">
+</div>
+
+<div class="card">
+  <h2>Basic Method</h2>
+  <ol>
+    <li>Rinse the rice in a bowl or strainer until the water runs mostly clear (skip for risotto rice).</li>
+    <li>Add rice, water and a pinch of salt to a pot with a tight lid.</li>
+    <li>Bring to a boil, then <b>cover and drop to the lowest heat</b>.</li>
+    <li>Simmer for the time listed. <b>Don't lift the lid.</b></li>
+    <li>Turn off the heat and <b>rest, covered</b>, for the time listed.</li>
+    <li>Fluff with a fork (or fold gently with a paddle for sushi rice).</li>
+  </ol>
+  <p class="note" style="margin:10px 0 0">Ratios work with any scoop, so 1 part rice to the listed parts water. Amounts are a starting point; pots and heat vary, so adjust by about 2 tablespoons (30 mL) of water per cup of rice if it comes out too firm or too soft.</p>
+</div>
+
+<div id="list"></div>
+<p class="empty" id="empty">No rice found.</p>
+
+<script>
+  // ratio = parts water per 1 part rice (by volume); rice sorted: popular first, then A-Z
+  const RICE = [
+    { n:'Basmati (white)', pop:1, a:'indian pakistani long grain aromatic', d:'Long, dry, fluffy grains with a nutty aroma.',
+      r:1.5, cook:'15 min', rest:'10 min', tip:'Rinse well and soak 20–30 min for the longest, separate grains.' },
+    { n:'Sushi Rice (nigiri)', pop:1, a:'sushi nigiri japanese short grain japonica koshihikari calrose', d:'Short, sticky Japanese-style grains. Holds together for nigiri and rolls.',
+      r:1.2, cook:'12 min', rest:'10 min', tip:'Rinse until clear, soak 30 min. After resting, season with sushi vinegar while still warm.' },
+    { n:'Brown Rice (long grain)', pop:1, a:'whole grain', d:'Whole grain with the bran left on. Chewy and nutty.',
+      r:2, cook:'40 min', rest:'10 min', tip:'Soaking 30+ min can cut the cook time a little and soften the texture.' },
+
+    { n:'Arborio (risotto)', a:'risotto italian carnaroli', d:'Short, starchy, creamy. Cooked by gradually adding hot broth, not covered.',
+      r:3.5, cook:'18–20 min', rest:'2 min', tip:'Do not rinse. Add warm broth a ladle at a time, stirring often.' },
+    { n:'Basmati (brown)', a:'whole grain indian', d:'Whole grain basmati. Nutty, firmer than white.',
+      r:2, cook:'35–40 min', rest:'10 min', tip:'Soak 30 min before cooking.' },
+    { n:'Black (forbidden) Rice', a:'purple chinese whole grain', d:'Deep purple-black whole grain with a slightly sweet, nutty flavor.',
+      r:1.75, cook:'30–35 min', rest:'10 min', tip:'Soak a few hours if you have time; it will turn the water dark.' },
+    { n:'Brown Rice (short grain)', a:'whole grain japanese', d:'Whole grain, plumper and stickier than long grain brown.',
+      r:2, cook:'40–45 min', rest:'10 min', tip:'Great for rice bowls and sushi-style brown rice.' },
+    { n:'Jasmine', a:'thai fragrant long grain', d:'Soft, slightly sticky, floral aroma. Common with Thai and Southeast Asian food.',
+      r:1.5, cook:'15 min', rest:'10 min', tip:'Rinse once or twice; use closer to 1.25 for firmer rice.' },
+    { n:'Long Grain White', a:'regular american plain', d:'Everyday white rice. Light and fairly separate.',
+      r:2, cook:'15–18 min', rest:'5–10 min', tip:'Use 1.75 parts water if you rinse it well and like it firmer.' },
+    { n:'Medium Grain White', a:'calrose paella bomba valencia', d:'Softer and stickier than long grain. Calrose is the common one.',
+      r:1.5, cook:'15–18 min', rest:'10 min', tip:'Rinse until the water is mostly clear.' },
+    { n:'Parboiled (converted)', a:'uncle bens converted', d:'Pre-steamed before milling. Firm, separate grains that are hard to overcook.',
+      r:2, cook:'20–25 min', rest:'5 min', tip:'No need to rinse.' },
+    { n:'Red Rice', a:'camargue bhutanese whole grain', d:'Whole grain, nutty and earthy, slightly chewy.',
+      r:2, cook:'35–40 min', rest:'10 min', tip:'Rinse well.' },
+    { n:'Sticky / Glutinous Rice', a:'sweet rice thai lao mochi', d:'Very sticky when cooked. Used for mango sticky rice and Lao and Thai dishes. Traditionally steamed.',
+      r:1, cook:'15–20 min', rest:'10 min', tip:'Soak 4+ hours (or overnight) and drain first. Stovetop works, but steaming gives the best texture.' },
+    { n:'Wild Rice', a:'grass seed north american', d:'Technically a grass seed, not rice. Dark, chewy and nutty. Grains split open when done.',
+      r:3, cook:'45–55 min', rest:'5 min', tip:'Drain any extra water after cooking.' }
+  ];
+
+  const list = document.getElementById('list');
+  const empty = document.getElementById('empty');
+  const round5 = n => Math.round(n / 5) * 5;
+  const fmt = n => (Math.round(n * 100) / 100).toString();
+
+  function card(x) {
+    const w = c => round5(x.r * 240 * c);
+    return `<div class="card${x.pop ? ' pop' : ''}" data-s="${(x.n + ' ' + x.a).toLowerCase()}">
+      <div class="head"><span class="name">${x.n}</span>${x.pop ? '<span class="tag">Popular</span>' : ''}</div>
+      <div class="desc">${x.d}</div>
+      <div class="grid">
+        <div><b>1 : ${fmt(x.r)}</b><span>Rice : Water</span></div>
+        <div><b>${x.cook}</b><span>Simmer</span></div>
+        <div><b>${x.rest}</b><span>Rest</span></div>
+      </div>
+      <div class="water"><span class="note">Water for</span>
+        <b>1 cup</b> rice = <b>${w(1)} mL</b> &nbsp;·&nbsp;
+        <b>2</b> = <b>${w(2)} mL</b> &nbsp;·&nbsp;
+        <b>4</b> = <b>${w(4)} mL</b></div>
+      <p class="tip">${x.tip}</p>
+    </div>`;
+  }
+
+  list.innerHTML = RICE.map(card).join('');
+
+  document.getElementById('q').addEventListener('input', e => {
+    const terms = e.target.value.toLowerCase().split(/\s+/).filter(Boolean);
+    let shown = 0;
+    list.querySelectorAll('.card').forEach(c => {
+      const ok = terms.every(t => c.dataset.s.includes(t));
+      c.style.display = ok ? '' : 'none';
+      if (ok) shown++;
+    });
+    empty.style.display = shown ? 'none' : 'block';
+  });
+</script>
+</body>
+</html>
